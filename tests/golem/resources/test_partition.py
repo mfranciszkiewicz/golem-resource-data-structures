@@ -32,7 +32,7 @@ def _allocate_files(paths, sizes, data=None):
         written = 0
 
         with open(path, 'wb') as out:
-            while written < size - 1:
+            while written < size:
                 length = min(65536, size - written)
                 buf = os.urandom(length) if data is None else data * length
                 written += out.write(buf)

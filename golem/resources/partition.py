@@ -76,7 +76,7 @@ class Partition(object):
             written = 0
             data = fill * data_size
             with open(path, 'wb') as out:
-                while written < size - 1:
+                while written < size:
                     length = min(data_size, size - written)
                     written += out.write(data[:length])
 
