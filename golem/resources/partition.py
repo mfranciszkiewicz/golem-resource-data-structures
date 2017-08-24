@@ -8,7 +8,7 @@ from gevent.fileobject import FileObjectThread
 from threading import RLock
 
 
-DEFAULT_CHUNK_SIZE = 2048
+DEFAULT_CHUNK_SIZE = 1024 * 16
 
 
 class FileWrapper(object):
@@ -45,6 +45,7 @@ class Partition(object):
 
         # Read file sizes
         sizes = [os.path.getsize(p) for p in paths]
+        count = len(sizes)
 
         # Structure
         self._paths = paths
@@ -57,20 +58,18 @@ class Partition(object):
         self._iter_idx = 0
         self._iter_file = None
 
-        self._files = [None] * len(self._sizes)
-        self._locks = [RLock()] * len(self._sizes)
+        self._files = [None] * count
+        self._locks = [RLock() for _ in range(count)]
         self._open = False
 
     @staticmethod
     def allocate(paths, sizes, chunk_size=DEFAULT_CHUNK_SIZE,
-                 fill=b'0', data_size=65536):
+                 fill=b'0', data_size=1024 * 512):
         """ Allocates disk space for files.
             Creates a new Partition instance.  """
         for path, size in zip(paths, sizes):
             # Create directories
-            dir_path = os.path.dirname(path)
-            if not os.path.exists(dir_path):
-                os.makedirs(path, exist_ok=True)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
 
             # Write file contents
             written = 0
